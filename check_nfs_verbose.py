@@ -18,7 +18,7 @@ Exit Values:
 AUTHOR:
 	Stephen McGregor (01/12/2015) (Griffith University - SMS)
 
-Python 2.4.3 compatable :(
+Python 2.4.3 compatible :(
 '''
 import hashlib
 import os
