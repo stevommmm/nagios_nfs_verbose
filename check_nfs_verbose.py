@@ -115,10 +115,16 @@ class Mountstats(object):
 	__slots__ = [
 		'id', 'device', 'mountpoint',
 
-		'NULL', 'GETATTR', 'SETATTR', 'LOOKUP', 'ACCESS', 'READLINK', 
-		'READ', 'WRITE', 'CREATE', 'MKDIR', 'SYMLINK', 'MKNOD', 'REMOVE', 
-		'RMDIR', 'RENAME', 'LINK', 'READDIR', 'READDIRPLUS', 'FSSTAT', 
-		'FSINFO', 'PATHCONF', 'COMMIT'
+		'ACCESS', 'CLOSE', 'COMMIT', 'CREATE', 'CREATE_SESSION', 'DELEGRETURN', 
+		'DESTROY_SESSION', 'EXCHANGE_ID', 'FREE_STATEID', 'FS_LOCATIONS', 
+		'FSINFO', 'FSSTAT', 'GET_LEASE_TIME', 'GETACL', 'GETATTR', 
+		'GETDEVICEINFO', 'LAYOUTCOMMIT', 'LAYOUTGET', 'LAYOUTRETURN', 'LINK', 
+		'LOCK', 'LOCKT', 'LOCKU', 'LOOKUP', 'LOOKUP_ROOT', 'MKDIR', 'MKNOD', 
+		'NULL', 'OPEN', 'OPEN_CONFIRM', 'OPEN_DOWNGRADE', 'OPEN_NOATTR', 
+		'PATHCONF', 'READ', 'READDIR', 'READDIRPLUS', 'READLINK', 
+		'RECLAIM_COMPLETE', 'RELEASE_LOCKOWNER', 'REMOVE', 'RENAME', 'RENEW', 
+		'RMDIR', 'SECINFO', 'SEQUENCE', 'SERVER_CAPS', 'SETACL', 'SETATTR', 
+		'SETCLIENTID', 'SETCLIENTID_CONFIRM', 'STATFS', 'SYMLINK', 'WRITE'
 	]
 
 	def __init__(self, device, mountpoint):
@@ -197,7 +203,7 @@ def parse_mountstats(stats):
 					_device, _mount, _type = potential_match.groups()
 
 					# We only care about NFS, pass on all others
-					if not _type == "nfs":
+					if not _type.startswith("nfs"):
 						continue
 
 					current_device = Mountstats(_device, _mount)
@@ -222,8 +228,9 @@ def diff_stats(old_ms, new_ms):
 	- Mountstats.ACCESS.major_timeouts
 	'''
 	for attr in [x for x in new_ms.__slots__ if x.isupper()]:
-		if getattr(new_ms, attr).major_timeouts > getattr(old_ms, attr).major_timeouts:
-			yield "%s [%d]" % (attr, getattr(new_ms, attr).major_timeouts - getattr(old_ms, attr).major_timeouts)
+		if hasattr(new_ms, attr) and hasattr(old_ms, attr):
+			if getattr(new_ms, attr).major_timeouts > getattr(old_ms, attr).major_timeouts:
+				yield "%s [%d]" % (attr, getattr(new_ms, attr).major_timeouts - getattr(old_ms, attr).major_timeouts)
 
 
 def main(hostname, username):
